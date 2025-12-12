@@ -9,6 +9,7 @@ import Link from "next/link";
 export default function NewProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     category: "Bags",
@@ -17,6 +18,47 @@ export default function NewProductPage() {
     description: "",
     featured: false,
   });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("File harus berupa gambar");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Ukuran file maksimal 5MB");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("products")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from("products")
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, image: data.publicUrl });
+      alert("Gambar berhasil diupload!");
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      alert("Gagal upload gambar: " + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,8 +151,47 @@ export default function NewProductPage() {
 
           <div>
             <label className="block text-sm font-medium text-primary mb-2">
-              Image URL *
+              Product Image *
             </label>
+            
+            {/* Upload dari laptop */}
+            <div className="mb-4">
+              <label className="block">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <div className="px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-accent transition-colors text-center">
+                  {uploading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-accent"></div>
+                      <span className="text-sm text-secondary">Uploading...</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm font-medium text-primary">
+                        📁 Upload gambar dari laptop
+                      </p>
+                      <p className="text-xs text-secondary mt-1">
+                        Klik untuk pilih file (max 5MB)
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </label>
+            </div>
+
+            {/* Atau pakai URL */}
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex-1 h-px bg-gray-300"></div>
+              <span className="text-xs text-secondary">atau pakai URL</span>
+              <div className="flex-1 h-px bg-gray-300"></div>
+            </div>
+            
             <input
               type="url"
               value={formData.image}
@@ -119,11 +200,18 @@ export default function NewProductPage() {
               }
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none"
               placeholder="https://images.unsplash.com/..."
-              required
             />
-            <p className="mt-2 text-sm text-secondary">
-              Upload foto ke Unsplash/Imgur atau pakai Supabase Storage
-            </p>
+            
+            {formData.image && (
+              <div className="mt-4">
+                <p className="text-xs text-secondary mb-2">Preview:</p>
+                <img
+                  src={formData.image}
+                  alt="Preview"
+                  className="w-32 h-32 object-cover rounded-lg border"
+                />
+              </div>
+            )}
           </div>
 
           <div>

@@ -11,6 +11,7 @@ export default function EditProductPage() {
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -47,6 +48,52 @@ export default function EditProductPage() {
       alert("Gagal memuat product");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("File harus berupa gambar");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Ukuran file maksimal 5MB");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("products")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from("products")
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, image: data.publicUrl });
+      alert("Gambar berhasil diupload!");
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      alert("Gagal upload gambar: " + error.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -121,18 +168,58 @@ export default function EditProductPage() {
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
-              }
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-primary mb-2">
-                Price (Rp)
+              Product Image
+            </label>
+            
+            {/* Upload dari laptop */}
+            <div className="mb-4">
+              <label className="block">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <div className="px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-accent transition-colors text-center">
+                  {uploading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-accent"></div>
+                      <span className="text-sm text-secondary">Uploading...</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm font-medium text-primary">
+                        📁 Upload gambar dari laptop
+                      </p>
+                      <p className="text-xs text-secondary mt-1">
+                        Klik untuk pilih file (max 5MB)
+                      </p>
+                    </div>
+                  )}
+                </div>
               </label>
+            </div>
+
+            {/* Atau pakai URL */}
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex-1 h-px bg-gray-300"></div>
+              <span className="text-xs text-secondary">atau pakai URL</span>
+              <div className="flex-1 h-px bg-gray-300"></div>
+            </div>
+            
+            <input
+              type="url"
+              value={formData.image}
+              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none"
+              placeholder="https://images.unsplash.com/..."
+            />
+            
+            {formData.image && (
+              <div className="mt-4">
+                <p className="text-xs text-secondary mb-2">Preview:</p
               <input
                 type="number"
                 value={formData.price}
