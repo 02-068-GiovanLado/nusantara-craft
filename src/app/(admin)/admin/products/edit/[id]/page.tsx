@@ -73,18 +73,18 @@ export default function EditProductPage() {
       // Generate unique filename
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `products/${fileName}`;
+      const filePath = `poducts/${fileName}`;
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
-        .from("products")
+        .from("poducts")
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data } = supabase.storage
-        .from("products")
+        .from("poducts")
         .getPublicUrl(filePath);
 
       setFormData({ ...formData, image: data.publicUrl });
