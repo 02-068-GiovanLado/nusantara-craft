@@ -168,6 +168,52 @@ export default function EditProductPage() {
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
+              }
+              rows={4}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-primary mb-2">
+                Price (Rp)
+              </label>
+              <input
+                type="number"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none"
+                required
+                min="0"
+                step="1000"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-primary mb-2">
+                Category
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none"
+                required
+              >
+                <option value="">Select Category</option>
+                <option value="Bags">Bags</option>
+                <option value="Apparel">Apparel</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Home Decor">Home Decor</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-primary mb-2">
               Product Image
             </label>
             
