@@ -265,53 +265,7 @@ export default function EditProductPage() {
             
             {formData.image && (
               <div className="mt-4">
-                <p className="text-xs text-secondary mb-2">Preview:</p
-              <input
-                type="number"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none"
-                required
-                min="0"
-                step="1000"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-primary mb-2">
-                Category
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none"
-                required
-              >
-                <option value="">Select Category</option>
-                <option value="Bags">Bags</option>
-                <option value="Apparel">Apparel</option>
-                <option value="Accessories">Accessories</option>
-                <option value="Home Decor">Home Decor</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-primary mb-2">
-              Image URL
-            </label>
-            <input
-              type="url"
-              value={formData.image}
-              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none"
-              placeholder="https://images.unsplash.com/..."
-              required
-            />
-            {formData.image && (
-              <div className="mt-4">
+                <p className="text-xs text-secondary mb-2">Preview:</p>
                 <img
                   src={formData.image}
                   alt="Preview"
